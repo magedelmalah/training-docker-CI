@@ -6,7 +6,8 @@
 #    branch: master
 #    commands:
 #      - $DOCKER_HUB_TRIGGER
-
-test:
-  override:    
-    - mocha
+version: 2
+jobs:
+  test:
+    override:    
+      - mocha
