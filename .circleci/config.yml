@@ -23,6 +23,10 @@ executors:
 jobs: # a collection of steps
   build: # runs not using Workflows must have a `build` job as entry point
     executor: docker-publisher
+    environment:
+      IMAGE_NAME: magedelmalah/training-docker-ci
+      DOCKERHUB_USERNAME: magedelmalah
+      DOCKERHUB_PASS: auto@123
     working_directory: ~/src # directory where steps will run
     steps: # a collection of executable commands
       - checkout
