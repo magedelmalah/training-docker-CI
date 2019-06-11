@@ -1,11 +1,11 @@
-FROM centos
 #FROM circleci/node:latest
+
+FROM centos:centos
 
 MAINTAINER magedelmalah@hotmail.com
 
-
 # Enable EPEL for Node.js
-#RUN rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
+RUN rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm
 
 # Install Node...
 RUN yum install -y npm
