@@ -11,13 +11,19 @@
 #  override:    
 #    - mocha
 
-version: 2 # use CircleCI 2.0
+version: 2.1 # use CircleCI 2.0
+executors:
+  docker-publisher:
+    environment:
+      IMAGE_NAME: magedelmalah/training-docker-ci
+      DOCKERHUB_USERNAME: magedelmalah
+      DOCKERHUB_PASS: auto@123
+    docker:
+      - image: circleci/node:latest
 jobs: # a collection of steps
   build: # runs not using Workflows must have a `build` job as entry point
+    executor: docker-publisher
     working_directory: ~/src # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node:latest # ...with this image as the primary container; this is where all `steps` will run
-      #- image: mongo:3.4.4 # and this image as the secondary service container
     steps: # a collection of executable commands
       - checkout
 
@@ -45,3 +51,46 @@ jobs: # a collection of steps
       - run: mkdir reports
       # Run mocha
       - run: npm test
+      
+      - setup_remote_docker
+      - run:
+          name: Build Docker image
+          command: docker build -t $IMAGE_NAME:latest 
+      - run:
+          name: Archive Docker image
+          command: docker save -o image.tar $IMAGE_NAME
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image.tar
+          
+  publish-latest:
+    executor: docker-publisher
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - setup_remote_docker
+      - run:
+          name: Load archived Docker image
+          command: docker load -i /tmp/workspace/image.tar
+      - run:
+          name: Publish Docker Image to Docker Hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+            docker push $IMAGE_NAME:latest
+
+workflows:
+  version: 2
+  build-master:
+    jobs:
+      - build:
+        filters:
+          branches:
+            only: master
+            
+      - publish-latest:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
