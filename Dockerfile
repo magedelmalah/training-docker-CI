@@ -11,6 +11,8 @@ MAINTAINER magedelmalah@hotmail.com
 #RUN yum install -y npm
 RUN sudo npm install -g npm@latest
 
+RUN mkdir ~/src
+
 # Copy app to /src
 COPY . ~/src
 
